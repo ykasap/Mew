@@ -9,7 +9,7 @@
 
 #include "mew.h"
 
-private char version_message[] = "version 6.6 20140416 Kazu Yamamoto";
+private char version_message[] = "version 6.8 20180607 Kazu Yamamoto";
 
 #ifdef HAVE_UNISTD_H
 # include <sys/types.h>
@@ -262,7 +262,7 @@ ch_folder(char *folder) {
 	switch (c) {
 	case '+':
 		ch_mail_home(Mail_home);
-		if (p == NUL)
+		if (*p == NUL)
 			break;
 		if (chdir(p) != 0) {
 			if( no_fld_flag != 0 )
@@ -834,7 +834,7 @@ exec_init(unsigned int num) { /* num == 0 */
 	ch_folder(Current_folder);
 
 	if (pipe(pipes) != 0) warn_exit("can't open pipe.");
-	childpid = FORK();
+	childpid = fork();
 	if (childpid < 0) warn_exit("can't fork.");
 
 	if (childpid == 0) { /* I'm the child. */

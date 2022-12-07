@@ -21,7 +21,7 @@
     "server" "port" "ssh-server"
     "user" "auth-user" "auth-list"
     "helo-domain"
-    "status" "process" "ssh-process" "ssl-process"
+    "status" "process" "ssh-process" "ssl-process" "ssl-p"
     "qfld" "messages"
     ;; parameters used internally and should be initialized
     "string" "error" "auth-selected" "timer" "cont" "from" "sender"
@@ -123,6 +123,7 @@
   (let ((msgs (mew-smtp-get-messages pnm))
 	(qfld (mew-smtp-get-qfld pnm))
 	(case (mew-smtp-get-case pnm))
+	(buf (process-buffer pro))
 	msg)
     (if msgs
 	(progn
@@ -134,6 +135,7 @@
 	  (mew-smtp-set-case pnm case) ;; override
 	  (mew-smtp-set-messages pnm msgs)
 	  (set-process-buffer pro (current-buffer))
+	  (mew-remove-buffer buf)
 	  (mew-smtp-set-status pnm "mail-from")
 	  (mew-smtp-command-mail-from pro pnm))
       (mew-smtp-set-status pnm "quit")
@@ -390,6 +392,9 @@
 	(when mew-inherit-submission
 	  (setq family mew-smtp-submission-family)
 	  (setq nowait t))
+	(when (and (stringp port) (string-match "^/" port))
+	  (setq family 'local)
+	  (setq server 'local))
 	(setq pro (make-network-process :name name :buffer buf
 					:host server :service port
 					:family family :nowait nowait))
@@ -436,7 +441,7 @@
 	(pnm (mew-smtp-info-name case fallbacked))
 	(sshsrv (mew-smtp-ssh-server case))
 	(sslp (mew-smtp-ssl case))
-	(sslport (mew-smtp-ssl-port case))
+	(sslport (mew-*-to-string (mew-smtp-ssl-port case)))
 	mew-inherit-submission
 	process sshname sshpro sslname sslpro lport tlsp tls fallback)
     (when (and sslp (mew-port-equal port sslport))
@@ -497,11 +502,14 @@
       (mew-smtp-set-qfld pnm qfld)
       (mew-smtp-set-messages pnm msgs)
       (mew-smtp-set-server pnm server)
-      (mew-smtp-set-port pnm port)
+      (if sslp
+	  (mew-smtp-set-port pnm sslport)
+	(mew-smtp-set-port pnm port))
       (mew-smtp-set-process pnm process)
       (mew-smtp-set-ssh-server pnm sshsrv)
       (mew-smtp-set-ssh-process pnm sshpro)
       (mew-smtp-set-ssl-process pnm sslpro)
+      (mew-smtp-set-ssl-p pnm sslp)
       (mew-smtp-set-helo-domain pnm (mew-smtp-helo-domain case))
       (mew-smtp-set-user pnm user)
       (mew-smtp-set-auth-user pnm (mew-smtp-user case))
@@ -618,7 +626,10 @@
 	  (set-buffer buf)
 	  (mew-smtp-queue case error pnm))
 	(mew-smtp-log pnm error)
-	(message-box (format "%s  This mail has been queued to %s" error qfld)))
+
+	(if (memq system-type '(windows-nt ms-dos cygwin))
+	    (message (format "%s  This mail has been queued to %s" error qfld))
+	  (message-box (format "%s  This mail has been queued to %s" error qfld))))
        (done
 	(message "Sending in background...done"))
        (t
@@ -727,7 +738,7 @@
 	(server (mew-smtp-get-server pnm))
 	(port (mew-smtp-get-port pnm))
 	(sshsrv (mew-smtp-get-ssh-server pnm))
-	(sslp (mew-smtp-get-ssl-process pnm)))
+	(sslp (mew-smtp-get-ssl-p pnm)))
     (with-temp-buffer
       (and logtime (insert logtime))
       (and msgid (insert " id=" msgid))

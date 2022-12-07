@@ -6,6 +6,8 @@
 ;;; Code:
 
 (require 'mew)
+(eval-when-compile
+  (require 'mew-env0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -46,9 +48,7 @@
   (make-local-variable 'comment-start-skip)
   (setq comment-start-skip mew-comment-start-skip)
   (add-hook 'after-change-functions 'mew-draft-dynamic-highlight nil 'local)
-  (if (boundp 'write-file-functions)
-      (add-hook 'write-file-functions 'mew-encode-make-backup nil 'local)
-    (add-hook 'local-write-file-hooks 'mew-encode-make-backup))
+  (add-hook 'write-file-functions 'mew-encode-make-backup nil 'local)
   (make-local-variable 'after-save-hook)
   (when mew-require-final-newline
     (make-local-variable 'require-final-newline)
@@ -71,20 +71,22 @@
   (mew-draft-set-local-variables)
   (use-local-map mew-draft-mode-map)
   (set-syntax-table mew-draft-mode-syntax-table)
-  (cd (expand-file-name mew-home))
-  (mew-draft-setup-decoration)
-  (mew-ainfo-set-icon (file-name-nondirectory (buffer-file-name)))
-  (mew-tinfo-set-encrypted-p encrypted)
-  (mew-tinfo-set-privacy-err nil)
-  (mew-tinfo-set-privacy-type nil)
-  (mew-tinfo-set-use-flowed (mew-use-format-flowed (mew-tinfo-get-case)))
-  (mew-draft-mode-name) ;; must be after (mew-tinfo-set-encrypted-p encrypted)
-  (mew-run-mode-hooks 'text-mode-hook 'mew-draft-mode-hook)
-  ;; auto-fill-function is set by mew-draft-mode-hook
-  (when auto-fill-function
-    (make-local-variable 'auto-fill-function)
-    (setq auto-fill-function 'mew-draft-auto-fill))
-  (setq buffer-undo-list nil))
+  (let ((default-directory (expand-file-name mew-home)))
+    (unless (file-exists-p default-directory)
+      (mkdir default-directory))
+    (mew-draft-setup-decoration)
+    (mew-ainfo-set-icon (file-name-nondirectory (buffer-file-name)))
+    (mew-tinfo-set-encrypted-p encrypted)
+    (mew-tinfo-set-privacy-err nil)
+    (mew-tinfo-set-privacy-type nil)
+    (mew-tinfo-set-use-flowed (mew-use-format-flowed (mew-tinfo-get-case)))
+    (mew-draft-mode-name) ;; must be after (mew-tinfo-set-encrypted-p encrypted)
+    (mew-run-mode-hooks 'text-mode-hook 'mew-draft-mode-hook)
+    ;; auto-fill-function is set by mew-draft-mode-hook
+    (when auto-fill-function
+      (make-local-variable 'auto-fill-function)
+      (setq auto-fill-function 'mew-draft-auto-fill))
+    (setq buffer-undo-list nil)))
 
 (defun mew-draft-mode-name (&optional header)
   (let ((case (mew-tinfo-get-case))

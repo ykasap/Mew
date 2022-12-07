@@ -9,17 +9,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
-;;; Suppressing warnings at compile
-;;;
-
-(defmacro mew-no-warning-defvar (var-name)
-  `(unless (boundp ',var-name) (defvar ,var-name nil)))
-
-(defmacro mew-no-warning-defun (func-name)
-  `(unless (fboundp ',func-name) (defun ,func-name(&rest _args) nil)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
 ;;;
 ;;;
 
@@ -99,7 +88,8 @@ requires PTY.")
 
 (with-no-warnings
   (defun mew-set-coding-priority (pri)
-    (set-coding-priority pri)))
+    (apply 'set-coding-system-priority
+	   (mapcar (lambda (x) (symbol-value x)) pri))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -312,19 +302,6 @@ requires PTY.")
       (set-mouse-position
        (selected-frame) (1- (frame-width)) 0)))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Unix/Mac/Win
-;;;
-
-(cond
- ((>= emacs-major-version 24)
-  ;; this must be macro. If implemented as a function, its behavior
-  ;; is changed.
-  (defmacro mew-called-interactively-p ()
-    '(called-interactively-p 'interactive)))
- (t
-  (defalias 'mew-called-interactively-p 'called-interactively-p)))
 
 (provide 'mew-env)
 

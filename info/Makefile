@@ -45,23 +45,30 @@ PWD =
 DESTDIR =
 
 all: info
-info:
-	sed -e 's/@setfilename mew.ja.info/@setfilename mew.info/' \
-	    -e 's/@set ja/@set en/' mew.texi > tmp.texi
-	mv tmp.texi mew.texi
-	$(RM) mew.info*
-	$(TOUCH) mew.info
-	$(EMACS) -batch -q -no-site-file -l texinfmt \
-		-f batch-texinfo-format mew.texi
 
-jinfo:
+info: mew.info
+
+jinfo: mew.ja.info
+
+tmp.texi: mew.texi
+	sed -e 's/@setfilename mew.ja.info/@setfilename mew.info/' \
+	    -e 's/@set ja/@set en/' $? > $@
+	$(RM) mew.info*
+
+mew.info: tmp.texi
+	$(EMACS) -batch -q -no-site-file \
+		--eval "(set-default-coding-systems 'utf-8-unix)" \
+		-l texinfmt -f batch-texinfo-format $?
+
+tmpj.texi: mew.texi
 	sed -e 's/@setfilename mew.info/@setfilename mew.ja.info/' \
-	    -e 's/@set en/@set ja/' mew.texi > tmp.texi
-	mv tmp.texi mew.texi
+	    -e 's/@set en/@set ja/' $? > $@
 	$(RM) mew.ja.info*
-	$(TOUCH) mew.ja.info
-	$(EMACS) -batch -q -no-site-file -l texinfmt \
-		-f batch-texinfo-format mew.texi
+
+mew.ja.info: tmpj.texi
+	$(EMACS) -batch -q -no-site-file \
+		--eval "(set-default-coding-systems 'utf-8-unix)" \
+		-l texinfmt -f batch-texinfo-format $?
 
 install: install-info
 install-info:

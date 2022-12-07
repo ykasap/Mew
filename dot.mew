@@ -12,6 +12,12 @@
 
 ;; For SMTP
 ;(setq mew-smtp-server "your SMTP server")  ;; if not localhost
+;; Set 587 or submission to use submission port.
+;(setq mew-smtp-port "smtp")
+;; Set 'ipv6 for IPv6
+;(setq mew-smtp-submission-family 'ipv4)
+;; Set a user name to enable SMTP AUTH
+;(setq mew-smtp-user "foo@example.com")
 
 ;; For POP
 ;; (setq mew-pop-user "your POP account")  ;; (user-login-name)
@@ -32,6 +38,27 @@
 ;; For NNTP
 ;; (setq mew-nntp-user "your NNTP account")
 ;(setq mew-nntp-server "your NNTP server")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; POP/SMTP over SSL
+;;;
+;
+; This setting is necessary for Gmail etc.
+; stunnel has to be installed.
+;
+;(setq mew-mail-domain "example.jp")
+;(setq mew-ssl-verify-level 0) ;;; See a comment in mew-ssl.el for more detail
+;(setq mew-prog-ssl "/usr/local/bin/stunnel") ;;; for UNIX
+;(setq mew-prog-ssl "C:/Program Files (x86)/stunnel/tstunnel.exe") ;;; for Windows (instead of using stunnel.exe)
+;(setq mew-smtp-ssl t)
+;(setq mew-smtp-user "foo@example.com")
+;(setq mew-smtp-server "smtp.example.com")
+;(setq mew-pop-ssl t)
+;(setq mew-pop-user "foo@example.com")
+;(setq mew-pop-server "pop.example.com")
+;(setq mew-pop-auth 'pass)
+;(setq mew-use-cached-passwd t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

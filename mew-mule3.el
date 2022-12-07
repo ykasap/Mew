@@ -6,6 +6,10 @@
 ;;; Code:
 
 (eval-when-compile
+  (require 'mew-env0)
+  (require 'mew-func))
+
+(eval-when-compile
   (mew-no-warning-defun charset-priority-list))
 
 ;; must be here
@@ -155,6 +159,7 @@
     ("iso-2022-cn-ext"   iso-2022-cn-ext)
     ("gbk"               gbk)
     ("gb2312"            cn-gb-2312) ;; should be before cn-gb
+    ("gb18030"           gb18030)
     ("cn-gb"             cn-gb-2312)
     ("hz-gb-2312"        hz-gb-2312)
     ("big5"              chinese-big5)
